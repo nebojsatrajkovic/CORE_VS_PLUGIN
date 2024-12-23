@@ -1,0 +1,1 @@
+# CORE_VS_PLUGIN
