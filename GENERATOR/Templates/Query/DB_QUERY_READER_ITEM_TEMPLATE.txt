@@ -1,0 +1,1 @@
+﻿resultItem.${PROPERTY_NAME} = reader.IsDBNull("${PROPERTY_NAME}") ? default : reader.Get${READER_TYPE}("${PROPERTY_NAME}");

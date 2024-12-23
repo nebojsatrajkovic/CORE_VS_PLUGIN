@@ -1,0 +1,57 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.Common;
+using System.IO;
+using System.Linq;
+using System.Text;
+
+namespace ${NAMESPACE}
+{
+	public class ${CLASS_NAME}
+	{
+		public static ${RETURN_TYPE} Invoke(DbConnection connection, DbTransaction transaction, ${PARAMETER_TYPE} parameter)
+		{
+			var command = connection.CreateCommand();
+            command.Connection = connection;
+            command.Transaction = transaction;
+
+			const string commandLocation = "${COMMAND_LOCATION}";
+            command.CommandText = new StreamReader(System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream(commandLocation)).ReadToEnd();
+            command.CommandTimeout = 60;
+
+			${PARAMETERS_PLACEHOLDER}
+
+			var results = new List<${RESULT_TYPE}_Raw>();
+            var reader = command.ExecuteReader();
+
+			try
+			{
+				while (reader.Read())
+				{
+					var resultItem = new ${RESULT_TYPE}_Raw();
+
+					${READER_ITEMS}
+
+					results.Add(resultItem);
+				}
+
+				reader.Close();
+			}
+			catch(Exception ex)
+			{
+				reader.Close();
+
+                throw;
+			}
+
+			${RETURN_PLACEHOLDER}
+
+            return result;
+		}
+
+		${RAW_CLASS}
+	}
+
+	${CUSTOM_CLASSES}
+}

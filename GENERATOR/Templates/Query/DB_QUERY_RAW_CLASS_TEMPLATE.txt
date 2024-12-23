@@ -1,0 +1,11 @@
+﻿        class ${CLASS_NAME}
+        {
+            ${PROPERTIES}
+
+            private static bool EqualsDefaultValue<T>(T value)
+            {
+                return EqualityComparer<T>.Default.Equals(value, default);
+            }
+
+            ${CONVERT_METHOD}
+        }

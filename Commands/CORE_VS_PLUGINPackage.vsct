@@ -1,0 +1,157 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<!--  This is the file that defines the actual layout and type of the commands.
+        It is divided in different sections (e.g. command definition, command
+        placement, ...), with each defining a specific set of properties.
+        See the comment before each section for more details about how to
+        use it. -->
+
+	<!--  The VSCT compiler (the tool that translates this file into the binary
+        format that VisualStudio will consume) has the ability to run a preprocessor
+        on the vsct file; this preprocessor is (usually) the C++ preprocessor, so
+        it is possible to define includes and macros with the same syntax used
+        in C++ files. Using this ability of the compiler here, we include some files
+        defining some of the constants that we will use inside the file. -->
+
+	<!--This is the file that defines the IDs for all the commands exposed by VisualStudio. -->
+	<Extern href="stdidcmd.h" />
+
+	<!--This header contains the command ids for the menus provided by the shell. -->
+	<Extern href="vsshlids.h" />
+
+	<!--The Commands section is where commands, menus, and menu groups are defined.
+      This section uses a Guid to identify the package that provides the command defined inside it. -->
+	<Commands package="guidCORE_VS_PLUGINPackage">
+		<!-- Inside this section we have different sub-sections: one for the menus, another
+    for the menu groups, one for the buttons (the actual commands), one for the combos
+    and the last one for the bitmaps used. Each element is identified by a command id that
+    is a unique pair of guid and numeric identifier; the guid part of the identifier is usually
+    called "command set" and is used to group different command inside a logically related
+    group; your package should define its own command set in order to avoid collisions
+    with command ids defined by other packages. -->
+
+		<!-- In this section you can define new menu groups. A menu group is a container for
+         other menus or buttons (commands); from a visual point of view you can see the
+         group as the part of a menu contained between two lines. The parent of a group
+         must be a menu. -->
+		<Groups>
+			<Group guid="guidCORE_VS_PLUGINPackageCmdSet" id="MyMenuGroup" priority="0x0600">
+				<Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS" />
+			</Group>
+			<Group guid="guidCORE_VS_PLUGINPackageCmdSet_solution" id="MyMenuGroup" priority="0x0600">
+				<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_SOLNNODE" />
+			</Group>
+			<Group guid="guidCORE_VS_PLUGINPackageCmdSet_itemnode" id="MyMenuGroup" priority="0x0600">
+				<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_ITEMNODE" />
+			</Group>
+		</Groups>
+
+		<!--Buttons section. -->
+		<!--This section defines the elements the user can interact with, like a menu command or a button
+        or combo box in a toolbar. -->
+		<Buttons>
+			<!--To define a menu group you have to specify its ID, the parent menu and its display priority.
+          The command is visible and enabled by default. If you need to change the visibility, status, etc, you can use
+          the CommandFlag node.
+          You can add more than one CommandFlag node e.g.:
+              <CommandFlag>DefaultInvisible</CommandFlag>
+              <CommandFlag>DynamicVisibility</CommandFlag>
+          If you do not want an image next to your command, remove the Icon node /> -->
+			<Button guid="guidCORE_VS_PLUGINPackageCmdSet" id="CMD_Generate_MSSQL_ORMId" priority="0x0100" type="Button">
+				<Parent guid="guidCORE_VS_PLUGINPackageCmdSet" id="MyMenuGroup" />
+				<Icon guid="CMD_Generate_MSSQL_ORM_icon" id="CMD_Generate_MSSQL_ORM_icon1" />
+				<Strings>
+					<ButtonText>[DB] Generate MSSQL ORM</ButtonText>
+				</Strings>
+			</Button>
+
+			<Button guid="guidCORE_VS_PLUGINPackageCmdSet" id="cmdidCMD_Generate_MySQL_ORM" priority="0x0100" type="Button">
+				<Parent guid="guidCORE_VS_PLUGINPackageCmdSet" id="MyMenuGroup" />
+				<Icon guid="CMD_Generate_MySQL_ORM_icon" id="CMD_Generate_MySQL_ORM_icon1" />
+				<Strings>
+					<ButtonText>[DB] Generate MySQL ORM</ButtonText>
+				</Strings>
+			</Button>
+
+			<Button guid="guidCORE_VS_PLUGINPackageCmdSet" id="cmdidCMD_Generate_PostgreSQL_ORM" priority="0x0100" type="Button">
+				<Parent guid="guidCORE_VS_PLUGINPackageCmdSet" id="MyMenuGroup" />
+				<Icon guid="CMD_Generate_PostgreSQL_ORM_icon" id="CMD_Generate_PostgreSQL_ORM_icon1" />
+				<Strings>
+					<ButtonText>[DB] Generate PostgreSQL ORM</ButtonText>
+				</Strings>
+			</Button>
+			<Button guid="guidCORE_VS_PLUGINPackageCmdSet_solution" id="cmdidCMD_GIT_PullAll" priority="0x0100" type="Button">
+				<Parent guid="guidCORE_VS_PLUGINPackageCmdSet_solution" id="MyMenuGroup" />
+				<Icon guid="CMD_GIT_PullAll_icon" id="CMD_GIT_PullAll_icon1" />
+				<Strings>
+					<ButtonText>[GIT] Pull all repositories</ButtonText>
+				</Strings>
+			</Button>
+			<Button guid="guidCORE_VS_PLUGINPackageCmdSet_itemnode" id="cmdidCMD_Generate_Query" priority="0x0100" type="Button">
+				<Parent guid="guidCORE_VS_PLUGINPackageCmdSet_itemnode" id="MyMenuGroup" />
+				<Icon guid="CMD_Generate_Query_icon" id="CMD_Generate_Query_icon1" />
+				<Strings>
+					<ButtonText>[DB] Generate query</ButtonText>
+				</Strings>
+			</Button>
+		</Buttons>
+
+		<!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
+		<Bitmaps>
+			<Bitmap guid="CMD_Generate_MSSQL_ORM_icon" href="Resources\CMD_Generate_MSSQL_ORM_icon.png" usedList="CMD_Generate_MSSQL_ORM_icon1" />
+			<Bitmap guid="CMD_Generate_MySQL_ORM_icon" href="Resources\CMD_Generate_MySQL_ORM_icon.png" usedList="CMD_Generate_MySQL_ORM_icon1" />
+			<Bitmap guid="CMD_Generate_PostgreSQL_ORM_icon" href="Resources\CMD_Generate_PostgreSQL_ORM_icon.png" usedList="CMD_Generate_PostgreSQL_ORM_icon1" />
+			<Bitmap guid="CMD_GIT_PullAll_icon" href="Resources\CMD_GIT_PullAll_icon.png" usedList="CMD_GIT_PullAll_icon1" />
+			<Bitmap guid="CMD_Generate_Query_icon" href="Resources\CMD_Generate_Query_icon.png" usedList="CMD_Generate_Query_icon1" />
+		</Bitmaps>
+	</Commands>
+
+	<Symbols>
+		<!-- This is the package guid. -->
+		<GuidSymbol name="guidCORE_VS_PLUGINPackage" value="{7802fdd6-8369-4c06-bae3-7b106339974f}" />
+
+		<!-- This is the guid used to group the menu commands together -->
+		<GuidSymbol name="guidCORE_VS_PLUGINPackageCmdSet" value="{9886100a-09da-4e03-bf91-0b4105250694}">
+			<IDSymbol name="MyMenuGroup" value="0x1020" />
+			<IDSymbol name="CMD_Generate_MSSQL_ORMId" value="0x0100" />
+			<IDSymbol value="4129" name="cmdidCMD_Generate_MySQL_ORM" />
+			<IDSymbol value="4130" name="cmdidCMD_Generate_PostgreSQL_ORM" />
+		</GuidSymbol>
+
+		<GuidSymbol name="guidCORE_VS_PLUGINPackageCmdSet_solution" value="{e674492e-ff4e-4d34-b495-2f81eb5a86bf}">
+			<IDSymbol name="MyMenuGroup" value="0x1020" />
+			<IDSymbol value="4131" name="cmdidCMD_GIT_PullAll" />
+		</GuidSymbol>
+
+		<GuidSymbol name="guidCORE_VS_PLUGINPackageCmdSet_itemnode" value="{1d0d17d4-abaf-4a9e-b385-1b0b6ceb2670}">
+			<IDSymbol name="MyMenuGroup" value="0x1020" />
+			<IDSymbol value="4131" name="cmdidCMD_Generate_Query" />
+		</GuidSymbol>
+
+		<GuidSymbol name="CMD_Generate_MSSQL_ORM_icon" value="{A0B51B3C-BE84-4738-B0E6-E760DA775715}" />
+		<GuidSymbol name="CMD_Generate_MSSQL_ORM_icon" value="{A0B51B3C-BE84-4738-B0E6-E760DA775715}">
+			<IDSymbol name="CMD_Generate_MSSQL_ORM_icon1" value="1" />
+		</GuidSymbol>
+
+		<GuidSymbol name="CMD_Generate_MySQL_ORM_icon" value="{a9ecd490-ef15-4fb4-b2a0-1835e31c510d}" />
+		<GuidSymbol name="CMD_Generate_MySQL_ORM_icon" value="{a9ecd490-ef15-4fb4-b2a0-1835e31c510d}">
+			<IDSymbol name="CMD_Generate_MySQL_ORM_icon1" value="1" />
+		</GuidSymbol>
+
+		<GuidSymbol name="CMD_Generate_PostgreSQL_ORM_icon" value="{b03aecc6-6c76-41fc-9ba9-cc5017051b4a}" />
+		<GuidSymbol name="CMD_Generate_PostgreSQL_ORM_icon" value="{b03aecc6-6c76-41fc-9ba9-cc5017051b4a}">
+			<IDSymbol name="CMD_Generate_PostgreSQL_ORM_icon1" value="1" />
+		</GuidSymbol>
+
+		<GuidSymbol name="CMD_GIT_PullAll_icon" value="{8F645663-35B0-4E46-963B-6C2EE1AFEF3B}" />
+		<GuidSymbol name="CMD_GIT_PullAll_icon" value="{8F645663-35B0-4E46-963B-6C2EE1AFEF3B}">
+			<IDSymbol name="CMD_GIT_PullAll_icon1" value="1" />
+		</GuidSymbol>
+
+		<GuidSymbol name="CMD_Generate_Query_icon" value="{6bd690fa-1ee4-4ff9-bdbc-0fa7ad383b57}" />
+		<GuidSymbol name="CMD_Generate_Query_icon" value="{6bd690fa-1ee4-4ff9-bdbc-0fa7ad383b57}">
+			<IDSymbol name="CMD_Generate_Query_icon1" value="1" />
+		</GuidSymbol>
+	</Symbols>
+</CommandTable>

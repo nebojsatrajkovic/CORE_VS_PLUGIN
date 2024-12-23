@@ -1,0 +1,45 @@
+﻿<platform:DialogWindow  x:Class="CORE_VS_PLUGIN.MSSQL_GENERATOR.ORM_GENERATOR_WINDOW"
+                        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                        xmlns:platform="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
+                        mc:Ignorable="d"
+                        Width="433"
+                        Height="550"
+                        Title="Generate ORM"
+                        ResizeMode="NoResize"
+                        WindowStartupLocation="CenterScreen">
+    <Grid Margin="10,0,10,5">
+        <Button Name="btExit" Content="Exit" HorizontalAlignment="Center" Margin="0,474,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.252,0.754" Width="380" Click="btExit_Click"/>
+        <Button Name="btExecute" Content="Generate ORM" HorizontalAlignment="Center" Margin="0,411,0,0" VerticalAlignment="Top" RenderTransformOrigin="3.129,0.453" Width="380" Height="39" Click="btExecute_Click"/>
+
+        <Label Content="Configuration:" HorizontalAlignment="Center" Margin="0,235,311,0" VerticalAlignment="Top" RenderTransformOrigin="-0.277,0.401"/>
+        <TextBox Name="txtConfigurationFile" Margin="0,266,60,0" HorizontalAlignment="Center" TextWrapping="Wrap" Text="C:\CORE_VS_PLUGIN\configuration.json" Height="45" VerticalAlignment="Top" Width="331"/>
+        <Button Name="btnChooseConfigurationFile" Content="..." HorizontalAlignment="Center" Margin="345,265,0,0" VerticalAlignment="Top" Width="52" Height="46" Click="btnChooseConfigurationFile_Click"/>
+
+        <Label HorizontalAlignment="Center" Margin="0,20,0,0" VerticalAlignment="Top" RenderTransformOrigin="-1.105,-0.269" Width="380" Height="50">
+            <Label.Resources>
+                <Style TargetType="TextBlock">
+                    <Setter Property="TextWrapping" Value="WrapWithOverflow" />
+                </Style>
+            </Label.Resources>
+
+            <Label.Content>
+                <AccessText TextWrapping="Wrap" Text="In order to generate ORM classes please select configuration file and ORM template file. File must be a JSON string that looks like:"/>
+            </Label.Content>
+        </Label>
+        <Label Name="lblConfigurationObjectPreview" HorizontalAlignment="Center" Margin="0,70,0,0" VerticalAlignment="Top" Width="380" Height="100">
+            <Label.Resources>
+                <Style TargetType="TextBlock">
+                    <Setter Property="TextWrapping" Value="WrapWithOverflow" />
+                </Style>
+            </Label.Resources>
+
+            <Label.Content>
+                <AccessText TextWrapping="Wrap" Text=""/>
+            </Label.Content>
+        </Label>
+
+    </Grid>
+</platform:DialogWindow>

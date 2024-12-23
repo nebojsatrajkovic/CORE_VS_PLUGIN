@@ -1,0 +1,1 @@
+﻿${PROPERTY_NAME} = gfunct_${CLASS_NAME}.First().${PROPERTY_NAME},

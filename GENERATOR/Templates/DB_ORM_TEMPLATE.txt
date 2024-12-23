@@ -1,0 +1,25 @@
+﻿using Core.DB.Plugin.${DB_TYPE}.Database;
+using Core.DB.Plugin.Shared.Attributes;
+
+namespace ${NAMESPACE};
+
+public static class ${TABLE_NAME}
+{
+    public static DBTable<ORM, QueryParameter> Database { get; }
+
+    static ${TABLE_NAME}()
+    {
+        Database = new DBTable<ORM, QueryParameter>();
+    }
+
+    public class ORM
+    {
+        [CORE_DB_SQL_PrimaryKey]
+${MODEL_ATTRIBUTES}
+    }
+
+    public class QueryParameter
+    {
+${QUERY_ATTRIBUTES}
+    }
+}

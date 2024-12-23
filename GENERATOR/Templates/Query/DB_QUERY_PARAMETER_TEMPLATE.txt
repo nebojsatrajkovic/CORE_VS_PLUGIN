@@ -1,0 +1,4 @@
+﻿var ${PARAMETER_REFERENCE_NAME} = command.CreateParameter();
+${PARAMETER_REFERENCE_NAME}.ParameterName = "${PARAMETER_NAME}";
+${PARAMETER_REFERENCE_NAME}.Value = ${PARAMETER_VALUE};
+command.Parameters.Add(${PARAMETER_REFERENCE_NAME});

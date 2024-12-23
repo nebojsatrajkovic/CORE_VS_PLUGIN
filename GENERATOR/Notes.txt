@@ -1,0 +1,12 @@
+﻿[TODO]
+- [*] create win cmd commands to generate classes in order to use this with external companies
+- test if mysql and mssql have same issue when string value contains "'" character, for example (Player Unknown's Battlegrounds)
+- refactor generator to create parameterized query -> enables proper handling of special values
+- Implement code-first generator -> generate mssql script with create/alter statements
+
+[PostgreSQL]
+SELECT * FROM information_schema.tables where table_schema = 'public';
+CREATE USER postgresql_dev WITH PASSWORD 'postgresql_dev';
+GRANT USAGE ON SCHEMA public TO postgresql_dev;
+GRANT ALL PRIVILEGES ON DATABASE smdb TO postgresql_dev;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO postgresql_dev;
