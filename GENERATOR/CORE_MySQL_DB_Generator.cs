@@ -63,7 +63,10 @@ namespace CORE_VS_PLUGIN.GENERATOR
 
                                     if (!string.IsNullOrEmpty(value))
                                     {
-                                        tableNames.Add($"'{value}'");
+                                        if (string.IsNullOrEmpty(configuration.TablesPrefix) || value.StartsWith(configuration.TablesPrefix, StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            tableNames.Add($"'{value}'");
+                                        }
                                     }
                                 }
 
