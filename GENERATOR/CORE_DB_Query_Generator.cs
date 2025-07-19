@@ -155,7 +155,7 @@ namespace CORE_VS_PLUGIN.GENERATOR
 
             var classFilePath = $"{containingFolder}\\{xmlTemplate.Meta.MethodClassName}.cs";
 
-            File.WriteAllText(classFilePath, classTemplate.FormatCode());
+            File.WriteAllText(classFilePath, classTemplate.FormatCode().FormatCode());
 
             CopyToProject(project, classFilePath);
         }

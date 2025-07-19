@@ -1,11 +1,12 @@
 ﻿internal static List<${CLASS_NAME}> Convert(List<${CLASS_NAME}_Raw> rawResult)
 {
-	var groupResult = from ${ELEMENT_NAME} in rawResult.Where(element => !EqualsDefaultValue(element.${GROUPING_KEY})).ToList()
+	var groupResult = from ${ELEMENT_NAME} in rawResult.Where(element => !EqualsDefaultValue(element.${GROUPING_KEY}))
 		group ${ELEMENT_NAME} by new
 		{
 			${ELEMENT_NAME}.${GROUPING_KEY}
 		}
 		into gfunct_${CLASS_NAME}
+		let gfunct_${CLASS_NAME}_first = gfunct_${CLASS_NAME}.First()
 		select new ${CLASS_NAME}
 		{
 			${GROUPING_KEY} = gfunct_${CLASS_NAME}.Key.${GROUPING_KEY},

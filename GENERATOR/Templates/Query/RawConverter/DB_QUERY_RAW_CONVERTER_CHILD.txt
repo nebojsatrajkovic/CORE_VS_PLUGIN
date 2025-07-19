@@ -1,11 +1,12 @@
 ﻿${MEMBER_NAME} = 
 (
-	from ${ELEMENT_NAME} in {GFUNCT_NAME}.Where(element => !EqualsDefaultValue(element.${GROUPING_KEY})).ToList()
+	from ${ELEMENT_NAME} in {GFUNCT_NAME}.Where(element => !EqualsDefaultValue(element.${GROUPING_KEY}))
 	group ${ELEMENT_NAME} by new
 	{
 		${ELEMENT_NAME}.${GROUPING_KEY}
 	}
 	into gfunct_${MEMBER_NAME}
+	let gfunct_${MEMBER_NAME}_first = gfunct_${MEMBER_NAME}.First()
 	select new ${CLASS_NAME}
 	{
 		${GROUPING_KEY} = gfunct_${MEMBER_NAME}.Key.${GROUPING_KEY},
