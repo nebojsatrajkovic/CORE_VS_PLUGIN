@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="CORE_VS_PLUGIN.42b90895-9dca-4af5-8d0d-311a9afc0bda" Version="1.0" Language="en-US" Publisher="NT" />
+        <Identity Id="CORE_VS_PLUGIN.42b90895-9dca-4af5-8d0d-311a9afc0bda" Version="1.0" Language="en-US" Publisher="Nebojsa Trajkovic" />
         <DisplayName>CORE_VS_PLUGIN</DisplayName>
         <Description xml:space="preserve">CORE_VS_PLUGIN</Description>
         <Icon>logo.png</Icon>

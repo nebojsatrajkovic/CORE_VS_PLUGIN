@@ -4,30 +4,32 @@ using System.Data;
 using System.Data.Common;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace ${NAMESPACE}
 {
 	public class ${CLASS_NAME}
 	{
-		public static ${RETURN_TYPE} Invoke(DbConnection connection, DbTransaction transaction, ${PARAMETER_TYPE} parameter)
+		public static async Task<${RETURN_TYPE}> InvokeAsync(DbConnection connection, DbTransaction transaction, ${PARAMETER_TYPE} parameter)
 		{
 			var command = connection.CreateCommand();
             command.Connection = connection;
             command.Transaction = transaction;
-
 			const string commandLocation = "${COMMAND_LOCATION}";
-            command.CommandText = new StreamReader(System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream(commandLocation)).ReadToEnd();
+            var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(commandLocation) ?? throw new InvalidOperationException($"SQL resource not found: {commandLocation}");
+            using var streamReader = new StreamReader(stream);
+            command.CommandText = await streamReader.ReadToEndAsync();
             command.CommandTimeout = 60;
 
 			${PARAMETERS_PLACEHOLDER}
 
 			var results = new List<${RESULT_TYPE}_Raw>();
-            var reader = command.ExecuteReader();
+            await using var reader = await command.ExecuteReaderAsync();
 
 			try
 			{
-				while (reader.Read())
+				while (await reader.ReadAsync())
 				{
 					var resultItem = new ${RESULT_TYPE}_Raw();
 
