@@ -1,4 +1,4 @@
-﻿        class ${CLASS_NAME}
+﻿        private sealed class ${CLASS_NAME}
         {
             ${PROPERTIES}
 

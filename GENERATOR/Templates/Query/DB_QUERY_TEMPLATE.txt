@@ -13,11 +13,10 @@ namespace ${NAMESPACE}
 	{
 		public static async Task<${RETURN_TYPE}> InvokeAsync(DbConnection connection, DbTransaction transaction, ${PARAMETER_TYPE} parameter)
 		{
-			var command = connection.CreateCommand();
-            command.Connection = connection;
+			await using var command = connection.CreateCommand();
             command.Transaction = transaction;
 			const string commandLocation = "${COMMAND_LOCATION}";
-            var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(commandLocation) ?? throw new InvalidOperationException($"SQL resource not found: {commandLocation}");
+            using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(commandLocation) ?? throw new InvalidOperationException($"SQL resource not found: {commandLocation}");
             using var streamReader = new StreamReader(stream);
             command.CommandText = await streamReader.ReadToEndAsync();
             command.CommandTimeout = 60;
@@ -27,24 +26,13 @@ namespace ${NAMESPACE}
 			var results = new List<${RESULT_TYPE}_Raw>();
             await using var reader = await command.ExecuteReaderAsync();
 
-			try
+			while (await reader.ReadAsync())
 			{
-				while (await reader.ReadAsync())
-				{
-					var resultItem = new ${RESULT_TYPE}_Raw();
+				var resultItem = new ${RESULT_TYPE}_Raw();
 
-					${READER_ITEMS}
+				${READER_ITEMS}
 
-					results.Add(resultItem);
-				}
-
-				reader.Close();
-			}
-			catch(Exception ex)
-			{
-				reader.Close();
-
-                throw;
+				results.Add(resultItem);
 			}
 
 			${RETURN_PLACEHOLDER}
