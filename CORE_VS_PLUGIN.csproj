@@ -58,6 +58,7 @@
     <Compile Include="GENERATOR\CORE_DB_GENERATOR_Configuration.cs" />
     <Compile Include="GENERATOR\CORE_MSSQL_DB_Generator.cs" />
     <Compile Include="GENERATOR\Enumerations\CORE_DB_TABLE_TEMPLATE_PLACEHOLDER.cs" />
+    <Compile Include="GENERATOR\Model\CORE_DB_QUERY_Metadata.cs" />
     <Compile Include="GENERATOR\Model\CORE_DB_QUERY_XML.cs" />
     <Compile Include="GENERATOR\Model\CORE_DB_TABLE.cs" />
     <Compile Include="GENERATOR\ToolWindows\ORM_GENERATOR_WINDOW.xaml.cs">
@@ -145,6 +146,7 @@
     <EmbeddedResource Include="GENERATOR\Templates\Query\DB_QUERY_PARAMETER_TEMPLATE.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
+    <Content Include="GENERATOR\XML_Examples\Get_Accounts_for_Email.xml" />
     <Content Include="logo.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>

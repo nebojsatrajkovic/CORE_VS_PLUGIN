@@ -12,10 +12,6 @@ using System.Xml.Serialization;
 [XmlRoot(ElementName = "Template")]
 public class CORE_DB_QUERY_XML_Template
 {
-
-    [XmlElement(ElementName = "Meta")]
-    public CORE_DB_QUERY_XML_Meta Meta { get; set; }
-
     [XmlElement(ElementName = "SQL")]
     public string SQL { get; set; }
 
@@ -24,17 +20,6 @@ public class CORE_DB_QUERY_XML_Template
 
     [XmlElement(ElementName = "Result")]
     public CORE_DB_QUERY_XML_Result Result { get; set; }
-}
-
-[XmlRoot(ElementName = "Meta")]
-public class CORE_DB_QUERY_XML_Meta
-{
-
-    [XmlAttribute(AttributeName = "Method_Namespace")]
-    public string MethodNamespace { get; set; }
-
-    [XmlAttribute(AttributeName = "Method_ClassName")]
-    public string MethodClassName { get; set; }
 }
 
 [XmlRoot(ElementName = "Parameter")]

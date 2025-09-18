@@ -1,4 +1,5 @@
-﻿using EnvDTE;
+﻿using CORE_VS_PLUGIN.GENERATOR.Model;
+using EnvDTE;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.VisualStudio.Shell;
@@ -15,8 +16,11 @@ namespace CORE_VS_PLUGIN.GENERATOR
     {
         public static void GenerateQuery(Project project, CORE_DB_QUERY_XML_Template xmlTemplate, Dictionary<string, string> parameters)
         {
-            var pathTokens = parameters["File_Path"].Split('\\').ToList();
+            var pathTokens = parameters[CORE_DB_QUERY_Metadata.File_Path].Split('\\').ToList();
             pathTokens = pathTokens.Take(pathTokens.Count - 2).ToList();
+
+            var generatedClassNamespace = parameters[CORE_DB_QUERY_Metadata.Namespace];
+            var generatedClassName = parameters[CORE_DB_QUERY_Metadata.ClassName];
 
             var containingFolder = string.Join("\\", pathTokens);
 
@@ -24,7 +28,7 @@ namespace CORE_VS_PLUGIN.GENERATOR
 
             var sqlDirectory = $"{containingFolder}\\SQL";
 
-            var sqlFilePath = $"{sqlDirectory}\\{xmlTemplate.Meta.MethodClassName}.sql";
+            var sqlFilePath = $"{sqlDirectory}\\{generatedClassName}.sql";
 
             Directory.CreateDirectory(sqlDirectory);
 
@@ -44,13 +48,13 @@ namespace CORE_VS_PLUGIN.GENERATOR
             var index = pathTokens.IndexOf(projectNameToken);
             var commandLocationTokens = pathTokens.Skip(index).Take(pathTokens.Count - index).ToList();
             commandLocationTokens.Add("SQL");
-            commandLocationTokens.Add($"{xmlTemplate.Meta.MethodClassName}.sql");
+            commandLocationTokens.Add($"{generatedClassName}.sql");
             var commandLocation = string.Join(".", commandLocationTokens);
 
             // base data
             {
-                classTemplate = classTemplate.Replace("${NAMESPACE}", xmlTemplate.Meta.MethodNamespace);
-                classTemplate = classTemplate.Replace("${CLASS_NAME}", xmlTemplate.Meta.MethodClassName);
+                classTemplate = classTemplate.Replace("${NAMESPACE}", generatedClassNamespace);
+                classTemplate = classTemplate.Replace("${CLASS_NAME}", generatedClassName);
 
                 if (xmlTemplate.Parameter != null && !string.IsNullOrEmpty(xmlTemplate.Parameter.ClassName))
                 {
@@ -153,7 +157,7 @@ namespace CORE_VS_PLUGIN.GENERATOR
                 }
             }
 
-            var classFilePath = $"{containingFolder}\\{xmlTemplate.Meta.MethodClassName}.cs";
+            var classFilePath = $"{containingFolder}\\{generatedClassName}.cs";
 
             File.WriteAllText(classFilePath, classTemplate.FormatCode().FormatCode());
 

@@ -1,4 +1,5 @@
 ﻿using CORE_VS_PLUGIN.GENERATOR;
+using CORE_VS_PLUGIN.GENERATOR.Model;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
@@ -132,8 +133,10 @@ namespace CORE_VS_PLUGIN.Commands
                 {
                     var parameters = new Dictionary<string, string>
                     {
-                        ["Project_Path"] = selectedItem.ContainingProjectPath,
-                        ["File_Path"] = selectedItem.SelectedFilePath
+                        [CORE_DB_QUERY_Metadata.Project_Path] = selectedItem.ContainingProjectPath,
+                        [CORE_DB_QUERY_Metadata.File_Path] = selectedItem.SelectedFilePath,
+                        [CORE_DB_QUERY_Metadata.Namespace] = selectedItem.Namespace,
+                        [CORE_DB_QUERY_Metadata.ClassName] = selectedItem.ClassName
                     };
 
                     var content = File.ReadAllText(selectedItem.SelectedFilePath);
@@ -148,11 +151,6 @@ namespace CORE_VS_PLUGIN.Commands
 
                     if (xmlTemplate != null)
                     {
-                        if (!string.IsNullOrEmpty(selectedItem.Namespace))
-                        {
-                            xmlTemplate.Meta.MethodNamespace = selectedItem.Namespace;
-                        }
-
                         CORE_DB_Query_Generator.GenerateQuery(selectedItem.Item.ContainingProject, xmlTemplate, parameters);
                     }
                 }
@@ -200,12 +198,15 @@ namespace CORE_VS_PLUGIN.Commands
                         ? defaultNamespace
                         : $"{defaultNamespace}.{folderNamespace}";
 
+                    var filePath = projectItem.Properties.Item("FullPath").Value.ToString();
+
                     SelectedSolutionItem solutionItem = new SelectedSolutionItem
                     {
                         ContainingProjectPath = projectItem.ContainingProject.Properties.Item("FullPath").Value.ToString(),
-                        SelectedFilePath = projectItem.Properties.Item("FullPath").Value.ToString(),
+                        SelectedFilePath = filePath,
                         Item = projectItem,
-                        Namespace = finalNamespace
+                        Namespace = finalNamespace,
+                        ClassName = new FileInfo(filePath).Name
                     };
 
                     if (extensionFilter == null || solutionItem.SelectedFilePath.EndsWith(extensionFilter))
@@ -225,5 +226,6 @@ namespace CORE_VS_PLUGIN.Commands
         public string SelectedFilePath { get; set; }
         public string ContainingProjectPath { get; set; }
         public string Namespace { get; set; }
+        public string ClassName { get; set; }
     }
 }

@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Template>
+
+	<SQL>
+		SELECT
+		auth_account.auth_account_id
+		FROM auth_account
+		WHERE
+		auth_account.is_deleted = 0 And
+		auth_account.tenant_refid = @TenantID And
+		Lower(auth_account.email) = Lower(@Email)
+	</SQL>
+
+	<Parameter ClassName="P_GAfE">
+		<ClassMember Name="Email" Type="string" />
+		<ClassMember Name="TenantID" Type="int" />
+	</Parameter>
+
+	<Result>
+		<ResultClass Name="GAfE" IsCollection="true" GroupBy="auth_account_id">
+			<ClassMember Name="auth_account_id" Type="int" />
+		</ResultClass>
+	</Result>
+
+</Template>
