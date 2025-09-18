@@ -148,6 +148,11 @@ namespace CORE_VS_PLUGIN.Commands
 
                     if (xmlTemplate != null)
                     {
+                        if (!string.IsNullOrEmpty(selectedItem.Namespace))
+                        {
+                            xmlTemplate.Meta.MethodNamespace = selectedItem.Namespace;
+                        }
+
                         CORE_DB_Query_Generator.GenerateQuery(selectedItem.Item.ContainingProject, xmlTemplate, parameters);
                     }
                 }
@@ -176,11 +181,31 @@ namespace CORE_VS_PLUGIN.Commands
                 if (item.Object is ProjectItem)
                 {
                     ProjectItem projectItem = item.Object as ProjectItem;
-                    SelectedSolutionItem solutionItem = new SelectedSolutionItem()
+
+                    var containingProject = projectItem.ContainingProject;
+                    string defaultNamespace = containingProject.Properties.Item("DefaultNamespace").Value.ToString();
+
+                    string projectDir = Path.GetDirectoryName(containingProject.FullName);
+                    string fileDir = Path.GetDirectoryName(projectItem.FileNames[1]);
+
+                    // Relative path of the folder containing the file
+                    string relativePath = fileDir.Replace(projectDir, "").TrimStart(Path.DirectorySeparatorChar);
+
+                    // Drop the last folder
+                    string folderNamespace = Path.GetDirectoryName(relativePath)?
+                        .Replace(Path.DirectorySeparatorChar, '.') ?? string.Empty;
+
+                    // Build final namespace
+                    string finalNamespace = string.IsNullOrEmpty(folderNamespace)
+                        ? defaultNamespace
+                        : $"{defaultNamespace}.{folderNamespace}";
+
+                    SelectedSolutionItem solutionItem = new SelectedSolutionItem
                     {
                         ContainingProjectPath = projectItem.ContainingProject.Properties.Item("FullPath").Value.ToString(),
                         SelectedFilePath = projectItem.Properties.Item("FullPath").Value.ToString(),
-                        Item = projectItem
+                        Item = projectItem,
+                        Namespace = finalNamespace
                     };
 
                     if (extensionFilter == null || solutionItem.SelectedFilePath.EndsWith(extensionFilter))
@@ -199,5 +224,6 @@ namespace CORE_VS_PLUGIN.Commands
         public ProjectItem Item { get; set; }
         public string SelectedFilePath { get; set; }
         public string ContainingProjectPath { get; set; }
+        public string Namespace { get; set; }
     }
 }
