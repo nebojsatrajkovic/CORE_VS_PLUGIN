@@ -52,6 +52,7 @@ namespace CORE_VS_PLUGIN
             await CORE_VS_PLUGIN.Commands.CMD_Generate_PostgreSQL_ORM.InitializeAsync(this);
             await CORE_VS_PLUGIN.Commands.CMD_GIT_PullAll.InitializeAsync(this);
             await CORE_VS_PLUGIN.Commands.CMD_Generate_Query.InitializeAsync(this);
+            await CORE_VS_PLUGIN.Commands.CMD_PublishNugetPackage.InitializeAsync(this);
         }
 
         #endregion

@@ -1,5 +1,6 @@
 ﻿using EnvDTE;
-using EnvDTE80;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,7 +13,18 @@ namespace CORE_VS_PLUGIN.Utils
 {
     public static class CORE_VS_PLUGIN_HELPER
     {
-        public static List<FileInfo> _GetProjectsFileInfos(DTE dte)
+        internal static void ShowMessageBox(this AsyncPackage package, string title, string message, OLEMSGICON messageType)
+        {
+            VsShellUtilities.ShowMessageBox(
+                package,
+                message,
+                title,
+                messageType,
+                OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+        }
+
+        public static List<FileInfo> GetProjectsFileInfos(DTE dte)
         {
             Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 
@@ -46,65 +58,19 @@ namespace CORE_VS_PLUGIN.Utils
             return returnValue;
         }
 
-        public static string _GetStartupProjectName(IServiceProvider ServiceProvider)
+        internal static string CommandOutput(string command, string workingDirectory = null)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
-            var dte = (DTE)ServiceProvider.GetService(typeof(DTE));
-            var slnPath = dte?.Solution.FullName ?? string.Empty;
-
-            var slnFileInfo = new FileInfo(slnPath);
-            var csprojPath = new FileInfo(slnPath).Directory.GetFiles().First(x => x.Name.ToLower().EndsWith("csproj"));
-            var startupProjectName = csprojPath.Name;
-
-            return startupProjectName;
+            return CommandOutput(new List<string> { command }, workingDirectory);
         }
 
-        private static OutputWindowPane GetOutputPane(DTE dte, string pane)
+        internal static string CommandOutput(List<string> commands, string workingDirectory = null)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
-            var application = (DTE2)dte;
+            string command = string.Empty;
 
             try
             {
-                return application.ToolWindows.OutputWindow.OutputWindowPanes.Item(pane);
-            }
-            catch (Exception)
-            {
-                application.ToolWindows.OutputWindow.OutputWindowPanes.Add(pane);
-            }
+                command = string.Join(" && ", commands);
 
-            return application.ToolWindows.OutputWindow.OutputWindowPanes.Item(pane);
-        }
-
-        public static void WriteToConsole(DTE dte, string message)
-        {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
-            var outputWindowName = nameof(CORE_VS_PLUGIN);
-
-            var pane = GetOutputPane(dte, outputWindowName);
-
-            pane.OutputString(message);
-            pane.Activate();
-        }
-
-        public static void GIT_WriteToConsole(DTE dte, string message)
-        {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
-            var outputWindowName = $"{nameof(CORE_VS_PLUGIN)} -> GIT";
-
-            var pane = GetOutputPane(dte, outputWindowName);
-
-            pane.OutputString(Environment.NewLine);
-            pane.OutputString(message);
-            pane.OutputString(Environment.NewLine);
-
-            pane.Activate();
-        }
-
-        public static string CommandOutput(string command, string workingDirectory = null)
-        {
-            try
-            {
                 var procStartInfo = new ProcessStartInfo("cmd", "/c " + command);
 
                 procStartInfo.RedirectStandardError = procStartInfo.RedirectStandardInput = procStartInfo.RedirectStandardOutput = true;
@@ -135,6 +101,7 @@ namespace CORE_VS_PLUGIN.Utils
                 proc.BeginOutputReadLine();
                 proc.BeginErrorReadLine();
                 proc.WaitForExit();
+
                 return sb.ToString();
             }
             catch (Exception objException)

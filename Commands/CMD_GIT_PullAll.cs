@@ -87,52 +87,33 @@ namespace CORE_VS_PLUGIN.Commands
         private void Execute(object sender, EventArgs e)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-
-            string title = "GIT execution";
-            string message = "GIT repositories pull finished successfully!";
-            var messageType = OLEMSGICON.OLEMSGICON_INFO;
-
             var svc = ServiceProvider.GetServiceAsync(typeof(EnvDTE.DTE)).Result;
-
             var dte = svc as EnvDTE.DTE;
 
             try
             {
-                var projectFilesInfos = CORE_VS_PLUGIN_HELPER._GetProjectsFileInfos(dte);
+                var projectFilesInfos = CORE_VS_PLUGIN_HELPER.GetProjectsFileInfos(dte);
 
                 foreach (var projectFileInfo in projectFilesInfos)
                 {
                     var commandoutput = CORE_VS_PLUGIN_HELPER.CommandOutput($"cd {projectFileInfo.DirectoryName} & git pull");
-                    
-                    CORE_VS_PLUGIN_HELPER.GIT_WriteToConsole(dte, $"{projectFileInfo.Name} - {commandoutput}");
+
+                    ConsoleWriter.Write(dte, $"{projectFileInfo.Name} - {commandoutput}", nameof(CMD_GIT_PullAll));
                 }
+
+                package.ShowMessageBox(nameof(CORE_VS_PLUGIN), "Finished pulling code from all repositories!", OLEMSGICON.OLEMSGICON_INFO);
             }
             catch (Exception ex)
             {
-                title = "Error!";
-                message = "Failed to execute GIT pull!";
-
-                messageType = OLEMSGICON.OLEMSGICON_CRITICAL;
-
-                CORE_VS_PLUGIN_HELPER.GIT_WriteToConsole(dte, ex.Message);
-                CORE_VS_PLUGIN_HELPER.GIT_WriteToConsole(dte, ex.StackTrace);
+                ConsoleWriter.Write(dte, ex.Message, nameof(CMD_GIT_PullAll));
+                ConsoleWriter.Write(dte, ex.StackTrace, nameof(CMD_GIT_PullAll));
 
                 if (ex.InnerException != null && !string.IsNullOrEmpty(ex.InnerException.Message))
                 {
-                    CORE_VS_PLUGIN_HELPER.GIT_WriteToConsole(dte, ex.InnerException.Message);
+                    ConsoleWriter.Write(dte, ex.InnerException.Message, nameof(CMD_GIT_PullAll));
                 }
-            }
-            finally
-            {
-                CORE_VS_PLUGIN_HELPER.GIT_WriteToConsole(dte, "Finished pulling all GIT repositories!");
 
-                VsShellUtilities.ShowMessageBox(
-                package,
-                message,
-                title,
-                messageType,
-                OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                package.ShowMessageBox(nameof(CORE_VS_PLUGIN), "Failed to pull code from repositories!", OLEMSGICON.OLEMSGICON_CRITICAL);
             }
         }
     }

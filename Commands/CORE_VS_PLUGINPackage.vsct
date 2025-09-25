@@ -45,6 +45,9 @@
 			<Group guid="guidCORE_VS_PLUGINPackageCmdSet_itemnode" id="MyMenuGroup" priority="0x0600">
 				<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_ITEMNODE" />
 			</Group>
+			<Group guid="guidCORE_VS_PLUGINPackageCmdSet_project" id="MyProjectNodeGroup" priority="0x0600">
+				<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_PROJNODE" />
+			</Group>
 		</Groups>
 
 		<!--Buttons section. -->
@@ -95,6 +98,13 @@
 					<ButtonText>[DB] Generate query</ButtonText>
 				</Strings>
 			</Button>
+			<Button guid="guidCORE_VS_PLUGINPackageCmdSet_project" id="cmdidCMD_PublishNugetPackage" priority="0x0100" type="Button">
+				<Parent guid="guidCORE_VS_PLUGINPackageCmdSet_project" id="MyProjectNodeGroup" />
+				<Icon guid="CMD_PublishNugetPackage_icon" id="CMD_PublishNugetPackage_icon1" />
+				<Strings>
+					<ButtonText>[GIT] Publish NuGet package</ButtonText>
+				</Strings>
+			</Button>
 		</Buttons>
 
 		<!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
@@ -104,6 +114,7 @@
 			<Bitmap guid="CMD_Generate_PostgreSQL_ORM_icon" href="Resources\CMD_Generate_PostgreSQL_ORM_icon.png" usedList="CMD_Generate_PostgreSQL_ORM_icon1" />
 			<Bitmap guid="CMD_GIT_PullAll_icon" href="Resources\CMD_GIT_PullAll_icon.png" usedList="CMD_GIT_PullAll_icon1" />
 			<Bitmap guid="CMD_Generate_Query_icon" href="Resources\CMD_Generate_Query_icon.png" usedList="CMD_Generate_Query_icon1" />
+			<Bitmap guid="CMD_PublishNugetPackage_icon" href="Resources\CMD_PublishNugetPackage.png" usedList="CMD_PublishNugetPackage_icon1" />
 		</Bitmaps>
 	</Commands>
 
@@ -114,9 +125,10 @@
 		<!-- This is the guid used to group the menu commands together -->
 		<GuidSymbol name="guidCORE_VS_PLUGINPackageCmdSet" value="{9886100a-09da-4e03-bf91-0b4105250694}">
 			<IDSymbol name="MyMenuGroup" value="0x1020" />
-			<IDSymbol name="CMD_Generate_MSSQL_ORMId" value="0x0100" />
+			<IDSymbol value="0x0100" name="CMD_Generate_MSSQL_ORMId" />
 			<IDSymbol value="4129" name="cmdidCMD_Generate_MySQL_ORM" />
 			<IDSymbol value="4130" name="cmdidCMD_Generate_PostgreSQL_ORM" />
+
 		</GuidSymbol>
 
 		<GuidSymbol name="guidCORE_VS_PLUGINPackageCmdSet_solution" value="{e674492e-ff4e-4d34-b495-2f81eb5a86bf}">
@@ -126,7 +138,12 @@
 
 		<GuidSymbol name="guidCORE_VS_PLUGINPackageCmdSet_itemnode" value="{1d0d17d4-abaf-4a9e-b385-1b0b6ceb2670}">
 			<IDSymbol name="MyMenuGroup" value="0x1020" />
-			<IDSymbol value="4131" name="cmdidCMD_Generate_Query" />
+			<IDSymbol value="4132" name="cmdidCMD_Generate_Query" />
+		</GuidSymbol>
+
+		<GuidSymbol name="guidCORE_VS_PLUGINPackageCmdSet_project" value="{52E118AE-65E5-47D1-88AA-00BCDE03C256}">
+			<IDSymbol name="MyProjectNodeGroup" value="0x1020" />
+			<IDSymbol value="4133" name="cmdidCMD_PublishNugetPackage" />
 		</GuidSymbol>
 
 		<GuidSymbol name="CMD_Generate_MSSQL_ORM_icon" value="{A0B51B3C-BE84-4738-B0E6-E760DA775715}" />
@@ -152,6 +169,11 @@
 		<GuidSymbol name="CMD_Generate_Query_icon" value="{6bd690fa-1ee4-4ff9-bdbc-0fa7ad383b57}" />
 		<GuidSymbol name="CMD_Generate_Query_icon" value="{6bd690fa-1ee4-4ff9-bdbc-0fa7ad383b57}">
 			<IDSymbol name="CMD_Generate_Query_icon1" value="1" />
+		</GuidSymbol>
+
+		<GuidSymbol name="CMD_PublishNugetPackage_icon" value="{c029fd21-8556-421d-9638-aea5fe6555d7}" />
+		<GuidSymbol name="CMD_PublishNugetPackage_icon" value="{c029fd21-8556-421d-9638-aea5fe6555d7}">
+			<IDSymbol name="CMD_PublishNugetPackage_icon1" value="1" />
 		</GuidSymbol>
 	</Symbols>
 </CommandTable>

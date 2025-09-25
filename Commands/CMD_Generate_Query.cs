@@ -1,5 +1,6 @@
 ﻿using CORE_VS_PLUGIN.GENERATOR;
 using CORE_VS_PLUGIN.GENERATOR.Model;
+using CORE_VS_PLUGIN.Utils;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
@@ -22,7 +23,7 @@ namespace CORE_VS_PLUGIN.Commands
         /// <summary>
         /// Command ID.
         /// </summary>
-        public const int CommandId = 4131;
+        public const int CommandId = 4132;
 
         /// <summary>
         /// Command menu group (command set GUID).
@@ -94,75 +95,81 @@ namespace CORE_VS_PLUGIN.Commands
         private void Execute(object sender, EventArgs e)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
+            var svc = ServiceProvider.GetServiceAsync(typeof(DTE)).Result;
+            var dte = svc as DTE;
 
-            var message = "Successfully generated code!";
-            var title = nameof(CORE_VS_PLUGIN);
-            var messageType = OLEMSGICON.OLEMSGICON_INFO;
-
-            var selectedItems = ((UIHierarchy)((DTE2)ServiceProvider.GetServiceAsync(typeof(DTE)).Result).Windows.Item("{3AE79031-E1BC-11D0-8F78-00A0C9110057}").Object).SelectedItems as object[];
-
-            var filesPaths = new List<string>();
-
-            foreach (var item in selectedItems)
+            try
             {
-                if ((item as UIHierarchyItem)?.Object is ProjectItem)
-                {
-                    var fileInfo = (ProjectItem)(((UIHierarchyItem)item).Object);
+                var selectedItems = ((UIHierarchy)((DTE2)ServiceProvider.GetServiceAsync(typeof(DTE)).Result).Windows.Item("{3AE79031-E1BC-11D0-8F78-00A0C9110057}").Object).SelectedItems as object[];
 
-                    if (!string.IsNullOrEmpty(fileInfo.Name) && fileInfo.Name.ToLower().EndsWith("xml"))
+                var filesPaths = new List<string>();
+
+                foreach (var item in selectedItems)
+                {
+                    if ((item as UIHierarchyItem)?.Object is ProjectItem)
                     {
-                        filesPaths.Add(fileInfo.FileNames[1]);
+                        var fileInfo = (ProjectItem)(((UIHierarchyItem)item).Object);
+
+                        if (!string.IsNullOrEmpty(fileInfo.Name) && fileInfo.Name.ToLower().EndsWith("xml"))
+                        {
+                            filesPaths.Add(fileInfo.FileNames[1]);
+                        }
                     }
                 }
-            }
 
-            if (!filesPaths.Any())
-            {
-                title = "Warning!";
-                message = "No valid XML files were selected for code generating!";
-
-                messageType = OLEMSGICON.OLEMSGICON_WARNING;
-            }
-            else
-            {
-                var application = (DTE2)ServiceProvider.GetServiceAsync(typeof(DTE)).Result;
-
-                var selectedSolutionItems = GetSelectedSolutionItems(application, ".xml");
-
-                foreach (var selectedItem in selectedSolutionItems)
+                if (!filesPaths.Any())
                 {
-                    var parameters = new Dictionary<string, string>
+                    package.ShowMessageBox(nameof(CORE_VS_PLUGIN), "No valid XML files were selected for code generating!", OLEMSGICON.OLEMSGICON_CRITICAL);
+
+                    return;
+                }
+                else
+                {
+                    var application = (DTE2)ServiceProvider.GetServiceAsync(typeof(DTE)).Result;
+
+                    var selectedSolutionItems = GetSelectedSolutionItems(application, ".xml");
+
+                    foreach (var selectedItem in selectedSolutionItems)
                     {
-                        [CORE_DB_QUERY_Metadata.Project_Path] = selectedItem.ContainingProjectPath,
-                        [CORE_DB_QUERY_Metadata.File_Path] = selectedItem.SelectedFilePath,
-                        [CORE_DB_QUERY_Metadata.Namespace] = selectedItem.Namespace,
-                        [CORE_DB_QUERY_Metadata.ClassName] = selectedItem.ClassName
-                    };
+                        var parameters = new Dictionary<string, string>
+                        {
+                            [CORE_DB_QUERY_Metadata.Project_Path] = selectedItem.ContainingProjectPath,
+                            [CORE_DB_QUERY_Metadata.File_Path] = selectedItem.SelectedFilePath,
+                            [CORE_DB_QUERY_Metadata.Namespace] = selectedItem.Namespace,
+                            [CORE_DB_QUERY_Metadata.ClassName] = selectedItem.ClassName
+                        };
 
-                    var content = File.ReadAllText(selectedItem.SelectedFilePath);
-                    var serializer = new XmlSerializer(typeof(CORE_DB_QUERY_XML_Template));
+                        var content = File.ReadAllText(selectedItem.SelectedFilePath);
+                        var serializer = new XmlSerializer(typeof(CORE_DB_QUERY_XML_Template));
 
-                    CORE_DB_QUERY_XML_Template xmlTemplate = null;
+                        CORE_DB_QUERY_XML_Template xmlTemplate = null;
 
-                    using (var reader = new StringReader(content))
-                    {
-                        xmlTemplate = (CORE_DB_QUERY_XML_Template)serializer.Deserialize(reader);
+                        using (var reader = new StringReader(content))
+                        {
+                            xmlTemplate = (CORE_DB_QUERY_XML_Template)serializer.Deserialize(reader);
+                        }
+
+                        if (xmlTemplate != null)
+                        {
+                            CORE_DB_Query_Generator.GenerateQuery(selectedItem.Item.ContainingProject, xmlTemplate, parameters);
+                        }
                     }
 
-                    if (xmlTemplate != null)
-                    {
-                        CORE_DB_Query_Generator.GenerateQuery(selectedItem.Item.ContainingProject, xmlTemplate, parameters);
-                    }
+                    package.ShowMessageBox(nameof(CORE_VS_PLUGIN), "Successfully generated query code!", OLEMSGICON.OLEMSGICON_INFO);
                 }
             }
+            catch (Exception ex)
+            {
+                ConsoleWriter.Write(dte, ex.Message, nameof(CMD_Generate_Query));
+                ConsoleWriter.Write(dte, ex.StackTrace, nameof(CMD_Generate_Query));
 
-            VsShellUtilities.ShowMessageBox(
-                this.package,
-                message,
-                title,
-                messageType,
-                OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                if (ex.InnerException != null && !string.IsNullOrEmpty(ex.InnerException.Message))
+                {
+                    ConsoleWriter.Write(dte, ex.InnerException.Message, nameof(CMD_Generate_Query));
+                }
+
+                package.ShowMessageBox(nameof(CORE_VS_PLUGIN), "Failed to generate query code!", OLEMSGICON.OLEMSGICON_CRITICAL);
+            }
         }
 
         public List<SelectedSolutionItem> GetSelectedSolutionItems(DTE2 application, string extensionFilter = null)
