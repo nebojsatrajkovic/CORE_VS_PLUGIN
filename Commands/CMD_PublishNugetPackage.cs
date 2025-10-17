@@ -169,6 +169,47 @@ namespace CORE_VS_PLUGIN.Commands
 
                 #endregion execute git commands
 
+                try
+                {
+                    var gitConfigPath = Path.Combine(currentProject.DirectoryPath, ".git", "config");
+
+                    if (File.Exists(gitConfigPath))
+                    {
+                        var configText = File.ReadAllText(gitConfigPath);
+
+                        var match = Regex.Match(configText, @"^\s*url\s*=\s*(.+)$", RegexOptions.Multiline);
+                        if (match.Success)
+                        {
+                            string remoteUrl = match.Groups[1].Value.Trim();
+
+                            if (!string.IsNullOrEmpty(remoteUrl))
+                            {
+                                if (remoteUrl.EndsWith(".git")) remoteUrl = remoteUrl.Substring(0, remoteUrl.Length - 4);
+
+                                remoteUrl += "/-/jobs";
+
+                                var psi = new System.Diagnostics.ProcessStartInfo
+                                {
+                                    FileName = remoteUrl,
+                                    UseShellExecute = true
+                                };
+
+                                System.Diagnostics.Process.Start(psi);
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ConsoleWriter.Write(dte, ex.Message, nameof(CMD_PublishNugetPackage));
+                    ConsoleWriter.Write(dte, ex.StackTrace, nameof(CMD_PublishNugetPackage));
+
+                    if (ex.InnerException != null && !string.IsNullOrEmpty(ex.InnerException.Message))
+                    {
+                        ConsoleWriter.Write(dte, ex.InnerException.Message, nameof(CMD_PublishNugetPackage));
+                    }
+                }
+
                 package.ShowMessageBox(nameof(CORE_VS_PLUGIN), "Successfully created nuget package!", OLEMSGICON.OLEMSGICON_INFO);
             }
             catch (Exception ex)
