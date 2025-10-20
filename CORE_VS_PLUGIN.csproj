@@ -56,7 +56,7 @@
     <Compile Include="GENERATOR\CORE_DB_Query_Generator.cs" />
     <Compile Include="GENERATOR\CORE_MySQL_DB_Generator.cs" />
     <Compile Include="GENERATOR\CORE_PostgreSQL_DB_Generator.cs" />
-    <Compile Include="GENERATOR\Enumerations\GENERATOR_PLUGIN.cs" />
+    <Compile Include="GENERATOR\Enumerations\DATABASE_PLUGIN.cs" />
     <Compile Include="GENERATOR\CORE_DB_GENERATOR_Configuration.cs" />
     <Compile Include="GENERATOR\CORE_MSSQL_DB_Generator.cs" />
     <Compile Include="GENERATOR\Enumerations\CORE_DB_TABLE_TEMPLATE_PLACEHOLDER.cs" />

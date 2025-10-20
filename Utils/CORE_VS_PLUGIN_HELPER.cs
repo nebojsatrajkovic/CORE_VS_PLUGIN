@@ -1,4 +1,5 @@
 ﻿using EnvDTE;
+using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
@@ -26,7 +27,7 @@ namespace CORE_VS_PLUGIN.Utils
 
         public static List<FileInfo> GetProjectsFileInfos(DTE dte)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+            ThreadHelper.ThrowIfNotOnUIThread();
 
             var returnValue = new List<FileInfo>();
 
@@ -108,6 +109,53 @@ namespace CORE_VS_PLUGIN.Utils
             {
                 return $"Error in command: {command}, {objException.Message}";
             }
+        }
+
+        internal static (string path, string selectedNamespace) GetSelectedFolderPathAndNamespaceForDatabaseBrowser()
+        {
+            string path = string.Empty;
+            string selectedNamespace = string.Empty;
+
+            ThreadHelper.ThrowIfNotOnUIThread();
+            DTE2 dte = Package.GetGlobalService(typeof(DTE)) as DTE2;
+            Array selectedItems = (Array)dte.ToolWindows.SolutionExplorer.SelectedItems;
+            if (selectedItems == null || selectedItems.Length == 0)
+                return (null, null);
+
+            UIHierarchyItem selItem = (UIHierarchyItem)selectedItems.GetValue(0);
+            ProjectItem projectItem = selItem.Object as ProjectItem;
+            Project project = selItem.Object as Project;
+
+            var projectDir = Path.GetDirectoryName(projectItem?.ContainingProject.FullName
+                                                      ?? project?.FullName);
+            var defaultNs = projectItem?.ContainingProject.Properties.Item("DefaultNamespace").Value.ToString() ?? project?.Properties.Item("DefaultNamespace").Value.ToString();
+
+            string itemPath = null;
+            if (projectItem != null)
+                itemPath = projectItem.FileNames[1];
+            else if (project != null)
+                itemPath = projectDir;
+
+            path = itemPath.TrimEnd(Path.DirectorySeparatorChar);
+
+            var relative = string.Empty;
+
+            if (Directory.Exists(itemPath))
+            {
+                relative = itemPath.Substring(projectDir.Length).TrimStart(Path.DirectorySeparatorChar).TrimEnd(Path.DirectorySeparatorChar);
+            }
+            else if (File.Exists(itemPath))
+            {
+                relative = Path.GetDirectoryName(itemPath).Substring(projectDir.Length).TrimStart(Path.DirectorySeparatorChar).TrimEnd(Path.DirectorySeparatorChar);
+            }
+
+            var withoutLast = relative.Contains(Path.DirectorySeparatorChar.ToString()) ? Path.GetDirectoryName(relative) : string.Empty;
+
+            var folderNs = withoutLast.Replace(Path.DirectorySeparatorChar, '.');
+
+            selectedNamespace = string.IsNullOrEmpty(folderNs) ? defaultNs : defaultNs + "." + folderNs;
+
+            return (path, selectedNamespace);
         }
     }
 }

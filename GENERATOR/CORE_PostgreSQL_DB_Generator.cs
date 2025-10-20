@@ -165,7 +165,7 @@ namespace CORE_VS_PLUGIN.GENERATOR
                                    .Replace(CORE_DB_TABLE_TEMPLATE_PLACEHOLDER.MODEL_ATTRIBUTES.Description(), modelBuilder.ToString())
                                    .Replace(CORE_DB_TABLE_TEMPLATE_PLACEHOLDER.QUERY_ATTRIBUTES.Description(), queryBuilder.ToString())
                                    .Replace(CORE_DB_TABLE_TEMPLATE_PLACEHOLDER.PRIMARY_KEY_ATTRIBUTE.Description(), table.Columns[0].Name)
-                                   .Replace(CORE_DB_TABLE_TEMPLATE_PLACEHOLDER.DB_TYPE.Description(), GENERATOR_PLUGIN.PostgreSQL.Description());
+                                   .Replace(CORE_DB_TABLE_TEMPLATE_PLACEHOLDER.DB_TYPE.Description(), DATABASE_PLUGIN.PostgreSQL.Description());
 
                                 File.WriteAllText($"{configuration.ORM_Location}\\{table.Name}.cs", tableTemplate);
                             }

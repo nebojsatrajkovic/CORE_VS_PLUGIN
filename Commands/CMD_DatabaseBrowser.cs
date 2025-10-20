@@ -1,11 +1,9 @@
 ﻿using CORE_VS_PLUGIN.GENERATOR.ToolWindows;
 using CORE_VS_PLUGIN.Utils;
 using EnvDTE;
-using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
 using System;
 using System.ComponentModel.Design;
-using System.IO;
 using Task = System.Threading.Tasks.Task;
 
 namespace CORE_VS_PLUGIN.Commands
@@ -95,9 +93,9 @@ namespace CORE_VS_PLUGIN.Commands
 
             try
             {
-                var (path, selectedNamespace) = GetSelectedFolderPathAndNamespaceFor_ORM_XML_Generator();
+                var (path, selectedNamespace) = CORE_VS_PLUGIN_HELPER.GetSelectedFolderPathAndNamespaceForDatabaseBrowser();
 
-                var databaseBrowser = new DATABASE_BROWSER(dte, package, path, selectedNamespace, GENERATOR.Enumerations.GENERATOR_PLUGIN.MySQL);
+                var databaseBrowser = new DATABASE_BROWSER(dte, package, path, selectedNamespace);
                 databaseBrowser.Show();
             }
             catch (Exception ex)
@@ -110,53 +108,6 @@ namespace CORE_VS_PLUGIN.Commands
                     ConsoleWriter.Write(dte, ex.InnerException.Message, nameof(CMD_DatabaseBrowser));
                 }
             }
-        }
-
-        (string path, string selectedNamespace) GetSelectedFolderPathAndNamespaceFor_ORM_XML_Generator()
-        {
-            string path = string.Empty;
-            string selectedNamespace = string.Empty;
-
-            ThreadHelper.ThrowIfNotOnUIThread();
-            DTE2 dte = Package.GetGlobalService(typeof(DTE)) as DTE2;
-            Array selectedItems = (Array)dte.ToolWindows.SolutionExplorer.SelectedItems;
-            if (selectedItems == null || selectedItems.Length == 0)
-                return (null, null);
-
-            UIHierarchyItem selItem = (UIHierarchyItem)selectedItems.GetValue(0);
-            ProjectItem projectItem = selItem.Object as ProjectItem;
-            Project project = selItem.Object as Project;
-
-            var projectDir = Path.GetDirectoryName(projectItem?.ContainingProject.FullName
-                                                      ?? project?.FullName);
-            var defaultNs = projectItem?.ContainingProject.Properties.Item("DefaultNamespace").Value.ToString() ?? project?.Properties.Item("DefaultNamespace").Value.ToString();
-
-            string itemPath = null;
-            if (projectItem != null)
-                itemPath = projectItem.FileNames[1];
-            else if (project != null)
-                itemPath = projectDir;
-
-            path = itemPath.TrimEnd(Path.DirectorySeparatorChar);
-
-            var relative = string.Empty;
-
-            if (Directory.Exists(itemPath))
-            {
-                relative = itemPath.Substring(projectDir.Length).TrimStart(Path.DirectorySeparatorChar).TrimEnd(Path.DirectorySeparatorChar);
-            }
-            else if (File.Exists(itemPath))
-            {
-                relative = Path.GetDirectoryName(itemPath).Substring(projectDir.Length).TrimStart(Path.DirectorySeparatorChar).TrimEnd(Path.DirectorySeparatorChar);
-            }
-
-            var withoutLast = relative.Contains(Path.DirectorySeparatorChar.ToString()) ? Path.GetDirectoryName(relative) : string.Empty;
-
-            var folderNs = withoutLast.Replace(Path.DirectorySeparatorChar, '.');
-
-            selectedNamespace = string.IsNullOrEmpty(folderNs) ? defaultNs : defaultNs + "." + folderNs;
-
-            return (path, selectedNamespace);
         }
     }
 }

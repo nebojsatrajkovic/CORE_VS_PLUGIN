@@ -9,9 +9,9 @@ namespace CORE_VS_PLUGIN.MSSQL_GENERATOR
 {
     public partial class ORM_GENERATOR_WINDOW : DialogWindow
     {
-        GENERATOR_PLUGIN GENERATOR_PLUGIN;
+        DATABASE_PLUGIN GENERATOR_PLUGIN;
 
-        public ORM_GENERATOR_WINDOW(GENERATOR_PLUGIN GENERATOR_PLUGIN)
+        public ORM_GENERATOR_WINDOW(DATABASE_PLUGIN GENERATOR_PLUGIN)
         {
             this.GENERATOR_PLUGIN = GENERATOR_PLUGIN;
 
@@ -38,15 +38,15 @@ namespace CORE_VS_PLUGIN.MSSQL_GENERATOR
         {
             var isSuccess = false;
 
-            if (GENERATOR_PLUGIN == GENERATOR_PLUGIN.MSSQL)
+            if (GENERATOR_PLUGIN == DATABASE_PLUGIN.MSSQL)
             {
                 isSuccess = CORE_MSSQL_DB_Generator.GenerateORMs_FromMSSQL(txtConfigurationFile.Text);
             }
-            else if (GENERATOR_PLUGIN == GENERATOR_PLUGIN.MySQL)
+            else if (GENERATOR_PLUGIN == DATABASE_PLUGIN.MySQL)
             {
                 isSuccess = CORE_MySQL_DB_Generator.GenerateORMs_From_MySQL(txtConfigurationFile.Text);
             }
-            else if (GENERATOR_PLUGIN == GENERATOR_PLUGIN.PostgreSQL)
+            else if (GENERATOR_PLUGIN == DATABASE_PLUGIN.PostgreSQL)
             {
                 isSuccess = CORE_PostgreSQL_DB_Generator.GenerateORMs_From_PostgreSQL(txtConfigurationFile.Text);
             }

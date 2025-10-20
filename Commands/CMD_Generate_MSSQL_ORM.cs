@@ -88,7 +88,7 @@ namespace CORE_VS_PLUGIN.Commands
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            var window = new ORM_GENERATOR_WINDOW(GENERATOR_PLUGIN.MSSQL);
+            var window = new ORM_GENERATOR_WINDOW(DATABASE_PLUGIN.MSSQL);
             window.Show();
         }
     }

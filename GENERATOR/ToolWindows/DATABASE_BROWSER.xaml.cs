@@ -13,35 +13,28 @@ namespace CORE_VS_PLUGIN.GENERATOR.ToolWindows
 {
     public partial class DATABASE_BROWSER : DialogWindow
     {
-        public ObservableCollection<Database> Databases { get; set; } = new ObservableCollection<Database>();
-        public ObservableCollection<DatabaseTable> DatabaseTables { get; set; } = new ObservableCollection<DatabaseTable>();
+        public ObservableCollection<DB_DW_Database> Databases { get; set; } = new ObservableCollection<DB_DW_Database>();
+        public ObservableCollection<DB_DW_DatabaseTable> DatabaseTables { get; set; } = new ObservableCollection<DB_DW_DatabaseTable>();
 
         string path { get; set; }
         string itemNamespace { get; set; }
         DTE dte { get; set; }
         AsyncPackage package { get; set; }
-        GENERATOR_PLUGIN plugin { get; set; }
 
-        public DATABASE_BROWSER(DTE dte, AsyncPackage package, string path, string itemNamespace, GENERATOR_PLUGIN plugin)
+        public DATABASE_BROWSER(DTE dte, AsyncPackage package, string path, string itemNamespace)
         {
             this.dte = dte;
             this.package = package;
             this.path = path;
             this.itemNamespace = itemNamespace;
-            this.plugin = plugin;
 
             InitializeComponent();
 
             DataContext = this;
 
-            Databases.Add(new Database { Name = "Default database", ConnectionString = "Server=localhost;Database=core_db;Uid=root;Pwd=root;Port=3306" });
+            Databases.Add(new DB_DW_Database { Name = "MySQL database", ConnectionString = "Server=localhost;Database=core_db;Uid=root;Pwd=root;Port=3306", PluginType = DATABASE_PLUGIN.MySQL });
 
             CmbDatabase.SelectedValue = Databases[0];
-        }
-
-        void BtnExit_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            Close();
         }
 
         void BtnSearch_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -56,9 +49,24 @@ namespace CORE_VS_PLUGIN.GENERATOR.ToolWindows
 
                 var connectionString = (string)CmbDatabase.SelectedValue;
 
-                var databaseTables = SearchDatabaseTables(connectionString, searchCriteria);
+                var plugin = Databases[CmbDatabase.SelectedIndex].PluginType;
 
-                if (databaseTables.Count > 0)
+                List<DB_DW_DatabaseTable> databaseTables = default;
+
+                if (plugin == DATABASE_PLUGIN.MySQL)
+                {
+                    databaseTables = MySQL_SearchDatabaseTables(connectionString, searchCriteria);
+                }
+                else if (plugin == DATABASE_PLUGIN.MSSQL)
+                {
+                    databaseTables = MSSQL_SearchDatabaseTables(connectionString, searchCriteria);
+                }
+                else if (plugin == DATABASE_PLUGIN.PostgreSQL)
+                {
+                    databaseTables = PostgreSQL_SearchDatabaseTables(connectionString, searchCriteria);
+                }
+
+                if (databaseTables != null && databaseTables.Count > 0)
                 {
                     foreach (var databaseTable in databaseTables)
                     {
@@ -80,84 +88,23 @@ namespace CORE_VS_PLUGIN.GENERATOR.ToolWindows
             }
         }
 
-        List<DatabaseTable> SearchDatabaseTables(string connectionString, string searchCriteria)
-        {
-            var result = new List<DatabaseTable>();
-
-            try
-            {
-                using (var connection = new MySqlConnection(connectionString))
-                {
-                    connection.Open();
-
-                    using (var transaction = connection.BeginTransaction())
-                    {
-                        try
-                        {
-                            var query_GetTables = $"SHOW TABLES LIKE '%{searchCriteria}%';";
-
-                            using (var command_GetTables = new MySqlCommand(query_GetTables, connection, transaction))
-                            {
-                                using (var reader_GetTable = command_GetTables.ExecuteReader())
-                                {
-                                    while (reader_GetTable.Read())
-                                    {
-                                        var value = reader_GetTable.GetString(0);
-
-                                        if (!string.IsNullOrEmpty(value))
-                                        {
-                                            result.Add(new DatabaseTable { Name = value });
-                                        }
-                                    }
-
-                                    reader_GetTable.Close();
-                                }
-                            }
-                        }
-                        catch (System.Exception)
-                        {
-                            throw;
-                        }
-                        finally
-                        {
-                            transaction?.Rollback();
-
-                            connection?.Close();
-                        }
-                    }
-                }
-            }
-            catch (System.Exception ex)
-            {
-                ConsoleWriter.Write(dte, ex.Message, nameof(DATABASE_BROWSER));
-                ConsoleWriter.Write(dte, ex.StackTrace, nameof(DATABASE_BROWSER));
-
-                if (ex.InnerException != null && !string.IsNullOrEmpty(ex.InnerException.Message))
-                {
-                    ConsoleWriter.Write(dte, ex.InnerException.Message, nameof(DATABASE_BROWSER));
-                }
-
-                package.ShowMessageBox(nameof(DATABASE_BROWSER), "Failed to search database tables. Please check Visual Studio output.", Microsoft.VisualStudio.Shell.Interop.OLEMSGICON.OLEMSGICON_CRITICAL);
-            }
-
-            return result;
-        }
-
         void BtnGenerate_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             try
             {
-                if (plugin == GENERATOR_PLUGIN.MySQL)
+                var plugin = Databases[CmbDatabase.SelectedIndex].PluginType;
+
+                if (plugin == DATABASE_PLUGIN.MySQL)
                 {
                     GenerateORM_MySQL();
                 }
-                else if (plugin == GENERATOR_PLUGIN.MSSQL)
+                else if (plugin == DATABASE_PLUGIN.MSSQL)
                 {
-
+                    GenerateORM_MSSQL();
                 }
-                else if (plugin == GENERATOR_PLUGIN.PostgreSQL)
+                else if (plugin == DATABASE_PLUGIN.PostgreSQL)
                 {
-
+                    GenerateORM_PostgreSQL();
                 }
             }
             catch (System.Exception ex)
@@ -173,6 +120,8 @@ namespace CORE_VS_PLUGIN.GENERATOR.ToolWindows
                 package.ShowMessageBox(nameof(DATABASE_BROWSER), "Failed to generate XML files. Please check Visual Studio output.", Microsoft.VisualStudio.Shell.Interop.OLEMSGICON.OLEMSGICON_CRITICAL);
             }
         }
+
+        void BtnExit_Click(object sender, System.Windows.RoutedEventArgs e) => Close();
 
         void GenerateORM_MySQL()
         {
@@ -225,17 +174,105 @@ namespace CORE_VS_PLUGIN.GENERATOR.ToolWindows
                 }
             }
         }
+
+        void GenerateORM_MSSQL()
+        {
+
+        }
+
+        void GenerateORM_PostgreSQL()
+        {
+
+        }
+
+        List<DB_DW_DatabaseTable> MySQL_SearchDatabaseTables(string connectionString, string searchCriteria)
+        {
+            var result = new List<DB_DW_DatabaseTable>();
+
+            try
+            {
+                using (var connection = new MySqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    using (var transaction = connection.BeginTransaction())
+                    {
+                        try
+                        {
+                            var query_GetTables = $"SHOW TABLES LIKE '%{searchCriteria}%';";
+
+                            using (var command_GetTables = new MySqlCommand(query_GetTables, connection, transaction))
+                            {
+                                using (var reader_GetTable = command_GetTables.ExecuteReader())
+                                {
+                                    while (reader_GetTable.Read())
+                                    {
+                                        var value = reader_GetTable.GetString(0);
+
+                                        if (!string.IsNullOrEmpty(value))
+                                        {
+                                            result.Add(new DB_DW_DatabaseTable { Name = value });
+                                        }
+                                    }
+
+                                    reader_GetTable.Close();
+                                }
+                            }
+                        }
+                        catch (System.Exception)
+                        {
+                            throw;
+                        }
+                        finally
+                        {
+                            transaction?.Rollback();
+
+                            connection?.Close();
+                        }
+                    }
+                }
+            }
+            catch (System.Exception ex)
+            {
+                ConsoleWriter.Write(dte, ex.Message, nameof(DATABASE_BROWSER));
+                ConsoleWriter.Write(dte, ex.StackTrace, nameof(DATABASE_BROWSER));
+
+                if (ex.InnerException != null && !string.IsNullOrEmpty(ex.InnerException.Message))
+                {
+                    ConsoleWriter.Write(dte, ex.InnerException.Message, nameof(DATABASE_BROWSER));
+                }
+
+                package.ShowMessageBox(nameof(DATABASE_BROWSER), "Failed to search database tables. Please check Visual Studio output.", Microsoft.VisualStudio.Shell.Interop.OLEMSGICON.OLEMSGICON_CRITICAL);
+            }
+
+            return result;
+        }
+
+        List<DB_DW_DatabaseTable> MSSQL_SearchDatabaseTables(string connectionString, string searchCriteria)
+        {
+            // implement mssql search
+
+            return default;
+        }
+
+        List<DB_DW_DatabaseTable> PostgreSQL_SearchDatabaseTables(string connectionString, string searchCriteria)
+        {
+            // implement postgresql search
+
+            return default;
+        }
     }
 
-    public class DatabaseTable
+    public class DB_DW_DatabaseTable
     {
         public string Name { get; set; }
         public bool IsSelected { get; set; }
     }
 
-    public class Database
+    public class DB_DW_Database
     {
         public string Name { get; set; }
         public string ConnectionString { get; set; }
+        public DATABASE_PLUGIN PluginType { get; set; }
     }
 }

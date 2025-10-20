@@ -2,7 +2,7 @@
 
 namespace CORE_VS_PLUGIN.GENERATOR.Enumerations
 {
-    public enum GENERATOR_PLUGIN
+    public enum DATABASE_PLUGIN
     {
         [Description("MSSQL")]
         MSSQL,

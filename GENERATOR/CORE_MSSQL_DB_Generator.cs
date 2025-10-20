@@ -28,16 +28,6 @@ namespace CORE_VS_PLUGIN.MSSQL_GENERATOR
             try { Directory.Delete(configuration.ORM_Location, true); } catch (Exception) { }
             try { Directory.CreateDirectory(configuration.ORM_Location); } catch (Exception) { }
 
-            string template;
-
-            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("CORE_VS_PLUGIN.GENERATOR.Templates.DB_ORM_TEMPLATE.txt"))
-            {
-                using (var reader = new StreamReader(stream))
-                {
-                    template = reader.ReadToEnd();
-                }
-            }
-
             #endregion load configuration
 
             using (var connection = new SqlConnection(configuration.ConnectionString))
@@ -120,55 +110,7 @@ namespace CORE_VS_PLUGIN.MSSQL_GENERATOR
 
                         #endregion load tables data
 
-                        #region generate orm using template
-
-                        foreach (var table in tables)
-                        {
-                            if (table.Columns != null && table.Columns.Any())
-                            {
-                                var modelBuilder = new StringBuilder();
-                                var queryBuilder = new StringBuilder();
-
-                                foreach (var column in table.Columns.OrderBy(x => x.OrdinalPosition).ToList())
-                                {
-                                    var cSharpType = GetCSharpType(column.DataType);
-
-                                    if (column.IsNullable)
-                                    {
-                                        modelBuilder.AppendLine($"        public {cSharpType}? {column.Name} {{ get; set; }}");
-                                    }
-                                    else
-                                    {
-                                        if (column.OrdinalPosition == 1 && (column.DataType == -2 || column.DataType == -11))
-                                        {
-                                            modelBuilder.AppendLine($"        public Guid {column.Name} {{ get; set; }} = Guid.NewGuid();");
-                                        }
-                                        else if (IsValueType(cSharpType))
-                                        {
-                                            modelBuilder.AppendLine($"        public {cSharpType} {column.Name} {{ get; set; }}");
-                                        }
-                                        else
-                                        {
-                                            modelBuilder.AppendLine($"        public {cSharpType} {column.Name} {{ get; set; }} = null!;");
-                                        }
-                                    }
-
-                                    queryBuilder.AppendLine($"        public {cSharpType}? {column.Name} {{ get; set; }} = null;");
-                                }
-
-                                var tableTemplate = template
-                                   .Replace(CORE_DB_TABLE_TEMPLATE_PLACEHOLDER.NAMESPACE.Description(), configuration.ORM_Namespace)
-                                   .Replace(CORE_DB_TABLE_TEMPLATE_PLACEHOLDER.TABLE_NAME.Description(), table.Name)
-                                   .Replace(CORE_DB_TABLE_TEMPLATE_PLACEHOLDER.MODEL_ATTRIBUTES.Description(), modelBuilder.ToString())
-                                   .Replace(CORE_DB_TABLE_TEMPLATE_PLACEHOLDER.QUERY_ATTRIBUTES.Description(), queryBuilder.ToString())
-                                   .Replace(CORE_DB_TABLE_TEMPLATE_PLACEHOLDER.PRIMARY_KEY_ATTRIBUTE.Description(), table.Columns[0].Name)
-                                   .Replace(CORE_DB_TABLE_TEMPLATE_PLACEHOLDER.DB_TYPE.Description(), GENERATOR_PLUGIN.MSSQL.Description());
-
-                                File.WriteAllText($"{configuration.ORM_Location}\\{table.Name}.cs", tableTemplate);
-                            }
-                        }
-
-                        #endregion generate orm using template
+                        GenerateORM(tables, configuration.ORM_Namespace, configuration.ORM_Location);
 
                         Console.WriteLine($"{nameof(CORE_MSSQL_DB_Generator)}: Successfully generated classes!");
 
@@ -189,6 +131,65 @@ namespace CORE_VS_PLUGIN.MSSQL_GENERATOR
             }
 
             return isSuccess;
+        }
+
+        internal static void GenerateORM(List<CORE_DB_TABLE> tables, string classNamespace, string directory)
+        {
+            string template;
+
+            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("CORE_VS_PLUGIN.GENERATOR.Templates.DB_ORM_TEMPLATE.txt"))
+            {
+                using (var reader = new StreamReader(stream))
+                {
+                    template = reader.ReadToEnd();
+                }
+            }
+
+            foreach (var table in tables)
+            {
+                if (table.Columns != null && table.Columns.Any())
+                {
+                    var modelBuilder = new StringBuilder();
+                    var queryBuilder = new StringBuilder();
+
+                    foreach (var column in table.Columns.OrderBy(x => x.OrdinalPosition).ToList())
+                    {
+                        var cSharpType = GetCSharpType(column.DataType);
+
+                        if (column.IsNullable)
+                        {
+                            modelBuilder.AppendLine($"        public {cSharpType}? {column.Name} {{ get; set; }}");
+                        }
+                        else
+                        {
+                            if (column.OrdinalPosition == 1 && (column.DataType == -2 || column.DataType == -11))
+                            {
+                                modelBuilder.AppendLine($"        public Guid {column.Name} {{ get; set; }} = Guid.NewGuid();");
+                            }
+                            else if (IsValueType(cSharpType))
+                            {
+                                modelBuilder.AppendLine($"        public {cSharpType} {column.Name} {{ get; set; }}");
+                            }
+                            else
+                            {
+                                modelBuilder.AppendLine($"        public {cSharpType} {column.Name} {{ get; set; }} = null!;");
+                            }
+                        }
+
+                        queryBuilder.AppendLine($"        public {cSharpType}? {column.Name} {{ get; set; }} = null;");
+                    }
+
+                    var tableTemplate = template
+                       .Replace(CORE_DB_TABLE_TEMPLATE_PLACEHOLDER.NAMESPACE.Description(), classNamespace)
+                       .Replace(CORE_DB_TABLE_TEMPLATE_PLACEHOLDER.TABLE_NAME.Description(), table.Name)
+                       .Replace(CORE_DB_TABLE_TEMPLATE_PLACEHOLDER.MODEL_ATTRIBUTES.Description(), modelBuilder.ToString())
+                       .Replace(CORE_DB_TABLE_TEMPLATE_PLACEHOLDER.QUERY_ATTRIBUTES.Description(), queryBuilder.ToString())
+                       .Replace(CORE_DB_TABLE_TEMPLATE_PLACEHOLDER.PRIMARY_KEY_ATTRIBUTE.Description(), table.Columns[0].Name)
+                       .Replace(CORE_DB_TABLE_TEMPLATE_PLACEHOLDER.DB_TYPE.Description(), DATABASE_PLUGIN.MSSQL.Description());
+
+                    File.WriteAllText($"{directory}\\{table.Name}.cs", tableTemplate);
+                }
+            }
         }
 
         private static bool IsValueType(string cSharpType)
