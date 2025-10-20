@@ -1,0 +1,162 @@
+﻿using CORE_VS_PLUGIN.GENERATOR.ToolWindows;
+using CORE_VS_PLUGIN.Utils;
+using EnvDTE;
+using EnvDTE80;
+using Microsoft.VisualStudio.Shell;
+using System;
+using System.ComponentModel.Design;
+using System.IO;
+using Task = System.Threading.Tasks.Task;
+
+namespace CORE_VS_PLUGIN.Commands
+{
+    /// <summary>
+    /// Command handler
+    /// </summary>
+    internal sealed class CMD_DatabaseBrowser
+    {
+        /// <summary>
+        /// Command ID.
+        /// </summary>
+        public const int CommandId = 4131;
+
+        /// <summary>
+        /// Command menu group (command set GUID).
+        /// </summary>
+        public static readonly Guid CommandSet = new Guid("58A865A1-A6C6-474A-8816-019CD515F7D2");
+
+        /// <summary>
+        /// VS Package that provides this command, not null.
+        /// </summary>
+        private readonly AsyncPackage package;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CMD_DatabaseBrowser"/> class.
+        /// Adds our command handlers for menu (commands must exist in the command table file)
+        /// </summary>
+        /// <param name="package">Owner package, not null.</param>
+        /// <param name="commandService">Command service to add command to, not null.</param>
+        CMD_DatabaseBrowser(AsyncPackage package, OleMenuCommandService commandService)
+        {
+            this.package = package ?? throw new ArgumentNullException(nameof(package));
+            commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
+
+            var menuCommandID = new CommandID(CommandSet, CommandId);
+            var menuItem = new MenuCommand(this.Execute, menuCommandID);
+            commandService.AddCommand(menuItem);
+        }
+
+        /// <summary>
+        /// Gets the instance of the command.
+        /// </summary>
+        public static CMD_DatabaseBrowser Instance
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Gets the service provider from the owner package.
+        /// </summary>
+        IAsyncServiceProvider ServiceProvider
+        {
+            get
+            {
+                return this.package;
+            }
+        }
+
+        /// <summary>
+        /// Initializes the singleton instance of the command.
+        /// </summary>
+        /// <param name="package">Owner package, not null.</param>
+        public static async Task InitializeAsync(AsyncPackage package)
+        {
+            // Switch to the main thread - the call to AddCommand in CMD_DatabaseBrowser's constructor requires
+            // the UI thread.
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
+
+            OleMenuCommandService commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
+            Instance = new CMD_DatabaseBrowser(package, commandService);
+        }
+
+        /// <summary>
+        /// This function is the callback used to execute the command when the menu item is clicked.
+        /// See the constructor to see how the menu item is associated with this function using
+        /// OleMenuCommandService service and MenuCommand class.
+        /// </summary>
+        /// <param name="sender">Event sender.</param>
+        /// <param name="e">Event args.</param>
+        private void Execute(object sender, EventArgs e)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            var svc = ServiceProvider.GetServiceAsync(typeof(DTE)).Result;
+            var dte = svc as DTE;
+
+            try
+            {
+                var (path, selectedNamespace) = GetSelectedFolderPathAndNamespaceFor_ORM_XML_Generator();
+
+                var databaseBrowser = new DATABASE_BROWSER(dte, package, path, selectedNamespace, GENERATOR.Enumerations.GENERATOR_PLUGIN.MySQL);
+                databaseBrowser.Show();
+            }
+            catch (Exception ex)
+            {
+                ConsoleWriter.Write(dte, ex.Message, nameof(CMD_DatabaseBrowser));
+                ConsoleWriter.Write(dte, ex.StackTrace, nameof(CMD_DatabaseBrowser));
+
+                if (ex.InnerException != null && !string.IsNullOrEmpty(ex.InnerException.Message))
+                {
+                    ConsoleWriter.Write(dte, ex.InnerException.Message, nameof(CMD_DatabaseBrowser));
+                }
+            }
+        }
+
+        (string path, string selectedNamespace) GetSelectedFolderPathAndNamespaceFor_ORM_XML_Generator()
+        {
+            string path = string.Empty;
+            string selectedNamespace = string.Empty;
+
+            ThreadHelper.ThrowIfNotOnUIThread();
+            DTE2 dte = Package.GetGlobalService(typeof(DTE)) as DTE2;
+            Array selectedItems = (Array)dte.ToolWindows.SolutionExplorer.SelectedItems;
+            if (selectedItems == null || selectedItems.Length == 0)
+                return (null, null);
+
+            UIHierarchyItem selItem = (UIHierarchyItem)selectedItems.GetValue(0);
+            ProjectItem projectItem = selItem.Object as ProjectItem;
+            Project project = selItem.Object as Project;
+
+            var projectDir = Path.GetDirectoryName(projectItem?.ContainingProject.FullName
+                                                      ?? project?.FullName);
+            var defaultNs = projectItem?.ContainingProject.Properties.Item("DefaultNamespace").Value.ToString() ?? project?.Properties.Item("DefaultNamespace").Value.ToString();
+
+            string itemPath = null;
+            if (projectItem != null)
+                itemPath = projectItem.FileNames[1];
+            else if (project != null)
+                itemPath = projectDir;
+
+            path = itemPath.TrimEnd(Path.DirectorySeparatorChar);
+
+            var relative = string.Empty;
+
+            if (Directory.Exists(itemPath))
+            {
+                relative = itemPath.Substring(projectDir.Length).TrimStart(Path.DirectorySeparatorChar).TrimEnd(Path.DirectorySeparatorChar);
+            }
+            else if (File.Exists(itemPath))
+            {
+                relative = Path.GetDirectoryName(itemPath).Substring(projectDir.Length).TrimStart(Path.DirectorySeparatorChar).TrimEnd(Path.DirectorySeparatorChar);
+            }
+
+            var withoutLast = relative.Contains(Path.DirectorySeparatorChar.ToString()) ? Path.GetDirectoryName(relative) : string.Empty;
+
+            var folderNs = withoutLast.Replace(Path.DirectorySeparatorChar, '.');
+
+            selectedNamespace = string.IsNullOrEmpty(folderNs) ? defaultNs : defaultNs + "." + folderNs;
+
+            return (path, selectedNamespace);
+        }
+    }
+}

@@ -48,6 +48,9 @@
 			<Group guid="guidCORE_VS_PLUGINPackageCmdSet_project" id="MyProjectNodeGroup" priority="0x0600">
 				<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_PROJNODE" />
 			</Group>
+			<Group guid="guidCORE_VS_PLUGINPackageCmdSet_folder" id="MyFolderNodeGroup" priority="0x0600">
+				<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_FOLDERNODE" />
+			</Group>
 		</Groups>
 
 		<!--Buttons section. -->
@@ -105,6 +108,13 @@
 					<ButtonText>[GIT] Publish NuGet package</ButtonText>
 				</Strings>
 			</Button>
+			<Button guid="guidCORE_VS_PLUGINPackageCmdSet_folder" id="cmdidCMD_DatabaseBrowser" priority="0x0100" type="Button">
+				<Parent guid="guidCORE_VS_PLUGINPackageCmdSet_folder" id="MyFolderNodeGroup" />
+				<Icon guid="CMD_DatabaseBrowser_icon" id="CMD_DatabaseBrowser_icon1" />
+				<Strings>
+					<ButtonText>[DB] Database browser</ButtonText>
+				</Strings>
+			</Button>
 		</Buttons>
 
 		<!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
@@ -115,6 +125,7 @@
 			<Bitmap guid="CMD_GIT_PullAll_icon" href="Resources\CMD_GIT_PullAll_icon.png" usedList="CMD_GIT_PullAll_icon1" />
 			<Bitmap guid="CMD_Generate_Query_icon" href="Resources\CMD_Generate_Query_icon.png" usedList="CMD_Generate_Query_icon1" />
 			<Bitmap guid="CMD_PublishNugetPackage_icon" href="Resources\CMD_PublishNugetPackage.png" usedList="CMD_PublishNugetPackage_icon1" />
+			<Bitmap guid="CMD_DatabaseBrowser_icon" href="Resources\CMD_DatabaseBrowser.png" usedList="CMD_DatabaseBrowser_icon1" />
 		</Bitmaps>
 	</Commands>
 
@@ -128,7 +139,6 @@
 			<IDSymbol value="0x0100" name="CMD_Generate_MSSQL_ORMId" />
 			<IDSymbol value="4129" name="cmdidCMD_Generate_MySQL_ORM" />
 			<IDSymbol value="4130" name="cmdidCMD_Generate_PostgreSQL_ORM" />
-
 		</GuidSymbol>
 
 		<GuidSymbol name="guidCORE_VS_PLUGINPackageCmdSet_solution" value="{e674492e-ff4e-4d34-b495-2f81eb5a86bf}">
@@ -144,6 +154,11 @@
 		<GuidSymbol name="guidCORE_VS_PLUGINPackageCmdSet_project" value="{52E118AE-65E5-47D1-88AA-00BCDE03C256}">
 			<IDSymbol name="MyProjectNodeGroup" value="0x1020" />
 			<IDSymbol value="4133" name="cmdidCMD_PublishNugetPackage" />
+		</GuidSymbol>
+
+		<GuidSymbol name="guidCORE_VS_PLUGINPackageCmdSet_folder" value="{58A865A1-A6C6-474A-8816-019CD515F7D2}">
+			<IDSymbol name="MyFolderNodeGroup" value="0x1020" />
+			<IDSymbol value="4131" name="cmdidCMD_DatabaseBrowser" />
 		</GuidSymbol>
 
 		<GuidSymbol name="CMD_Generate_MSSQL_ORM_icon" value="{A0B51B3C-BE84-4738-B0E6-E760DA775715}" />
@@ -174,6 +189,11 @@
 		<GuidSymbol name="CMD_PublishNugetPackage_icon" value="{c029fd21-8556-421d-9638-aea5fe6555d7}" />
 		<GuidSymbol name="CMD_PublishNugetPackage_icon" value="{c029fd21-8556-421d-9638-aea5fe6555d7}">
 			<IDSymbol name="CMD_PublishNugetPackage_icon1" value="1" />
+		</GuidSymbol>
+
+		<GuidSymbol name="CMD_DatabaseBrowser_icon" value="{4b6280f8-4dbc-4df7-86f1-99d5d33c42ee}" />
+		<GuidSymbol name="CMD_DatabaseBrowser_icon" value="{4b6280f8-4dbc-4df7-86f1-99d5d33c42ee}">
+			<IDSymbol name="CMD_DatabaseBrowser_icon1" value="1" />
 		</GuidSymbol>
 	</Symbols>
 </CommandTable>
