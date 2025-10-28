@@ -8,6 +8,8 @@ using MySql.Data.MySqlClient;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace CORE_VS_PLUGIN.GENERATOR.ToolWindows
 {
@@ -15,6 +17,8 @@ namespace CORE_VS_PLUGIN.GENERATOR.ToolWindows
     {
         public ObservableCollection<DB_DW_Database> Databases { get; set; } = new ObservableCollection<DB_DW_Database>();
         public ObservableCollection<DB_DW_DatabaseTable> DatabaseTables { get; set; } = new ObservableCollection<DB_DW_DatabaseTable>();
+
+        HashSet<string> Selected_DatabaseTables;
 
         string path { get; set; }
         string itemNamespace { get; set; }
@@ -35,9 +39,26 @@ namespace CORE_VS_PLUGIN.GENERATOR.ToolWindows
             Databases.Add(new DB_DW_Database { Name = "MySQL database", ConnectionString = "Server=localhost;Database=core_db;Uid=root;Pwd=root;Port=3306", PluginType = DATABASE_PLUGIN.MySQL });
 
             CmbDatabase.SelectedValue = Databases[0];
+
+            Selected_DatabaseTables = new HashSet<string>();
         }
 
-        void BtnSearch_Click(object sender, System.Windows.RoutedEventArgs e)
+        void CheckBox_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is CheckBox cb && cb.DataContext is DB_DW_DatabaseTable table)
+            {
+                if (cb.IsChecked == true)
+                {
+                    Selected_DatabaseTables.Add(table.Name);
+                }
+                else
+                {
+                    Selected_DatabaseTables.Remove(table.Name);
+                }
+            }
+        }
+
+        void BtnSearch_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -70,6 +91,8 @@ namespace CORE_VS_PLUGIN.GENERATOR.ToolWindows
                 {
                     foreach (var databaseTable in databaseTables)
                     {
+                        databaseTable.IsSelected = Selected_DatabaseTables.Contains(databaseTable.Name);
+
                         DatabaseTables.Add(databaseTable);
                     }
                 }
@@ -88,7 +111,7 @@ namespace CORE_VS_PLUGIN.GENERATOR.ToolWindows
             }
         }
 
-        void BtnGenerate_Click(object sender, System.Windows.RoutedEventArgs e)
+        void BtnGenerate_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -121,7 +144,7 @@ namespace CORE_VS_PLUGIN.GENERATOR.ToolWindows
             }
         }
 
-        void BtnExit_Click(object sender, System.Windows.RoutedEventArgs e) => Close();
+        void BtnExit_Click(object sender, RoutedEventArgs e) => Close();
 
         void GenerateORM_MySQL()
         {
@@ -133,7 +156,7 @@ namespace CORE_VS_PLUGIN.GENERATOR.ToolWindows
 
                 using (var transaction = connection.BeginTransaction())
                 {
-                    var tableNames = DatabaseTables.Where(x => x.IsSelected).Select(x => $"'{x.Name}'").ToList();
+                    var tableNames = Selected_DatabaseTables.Select(x => $"'{x}'").ToList();
 
                     var dbTablesColumns = new List<CORE_DB_TABLE_COLUMN>();
 
