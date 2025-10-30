@@ -10,6 +10,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace CORE_VS_PLUGIN.GENERATOR.ToolWindows
 {
@@ -283,6 +284,16 @@ namespace CORE_VS_PLUGIN.GENERATOR.ToolWindows
             // implement postgresql search
 
             return default;
+        }
+
+        void TxtSearch_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                BtnSearch_Click(null, null);
+
+                e.Handled = true;
+            }
         }
     }
 

@@ -13,7 +13,7 @@
     <Canvas>
         <Button Name="BtnExit" Content="Exit" HorizontalAlignment="Center" VerticalAlignment="Center" Height="36" Width="159" Canvas.Left="631" Canvas.Top="563" Click="BtnExit_Click"/>
         <Label Name="LblSearch" Content="Search database tables:" Canvas.Left="356" Canvas.Top="12" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-        <TextBox x:Name="TxtSearch" Canvas.Left="495" TextWrapping="Wrap" Text="" Canvas.Top="16" Width="251" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        <TextBox x:Name="TxtSearch" Canvas.Left="495" TextWrapping="Wrap" Text="" Canvas.Top="16" Width="251" HorizontalAlignment="Left" VerticalAlignment="Top" KeyDown="TxtSearch_KeyDown" />
         <Button x:Name="BtnSearch" Content="Search" Canvas.Left="751" Canvas.Top="16" Click="BtnSearch_Click"/>
         <DataGrid x:Name="TblDatabaseTables" Height="389" Width="780" ItemsSource="{Binding DatabaseTables}" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserDeleteRows="False" CanUserAddRows="False" Canvas.Left="10" Canvas.Top="43">
             <DataGrid.Columns>
