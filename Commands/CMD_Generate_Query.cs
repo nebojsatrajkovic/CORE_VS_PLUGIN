@@ -213,7 +213,7 @@ namespace CORE_VS_PLUGIN.Commands
                         SelectedFilePath = filePath,
                         Item = projectItem,
                         Namespace = finalNamespace,
-                        ClassName = new FileInfo(filePath).Name
+                        ClassName = Path.GetFileNameWithoutExtension(filePath)
                     };
 
                     if (extensionFilter == null || solutionItem.SelectedFilePath.EndsWith(extensionFilter))
